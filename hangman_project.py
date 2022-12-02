@@ -52,7 +52,6 @@ def evalInputCharacter(character, gameContext):
                 gameContext["evalBoard"] = updateBoard(gameContext)
             else:
                 continue
-        # updated_board=''.join(temp_board)
         gameContext["letters"]=word.replace(character,'$')
         print('\n'+'Good guess g. Keep it going'+'\n')
         print('Board: {}'.format(gameContext["evalBoard"]))
@@ -62,9 +61,7 @@ def evalInputCharacter(character, gameContext):
         gameContext["wrong"]+=1
         print('\nBad guess. You\'re one step closer to dying cous')
         print('\n{}'.format(gameContext["evalBoard"]))
-        # print('\n',board,'              ','Wrong guesses:',gameContext["wrong"])
-        # print(''.join(stages[:gameContext["wrong"]]))
-        print(gameContext["stages"][:gameContext["wrong"]])
+        print('\n'.join(stages[:gameContext["wrong"]]))
 
     return gameContext
 
@@ -73,7 +70,7 @@ def evalEndCondition(gameContext):
         check against wrong and win
         if wrong -> run = false; 
     '''
-    if( gameContext["wrong"] > len(gameContext["stages"])):
+    if( gameContext["wrong"] > len(gameContext["stages"]) -1 ):
         print('\nThe word was {word}.\nDoes not matter tho, cause you already dead.\nGood luck in the afterlife.'.format(word=gameContext["word"].upper()))
         return True
     
