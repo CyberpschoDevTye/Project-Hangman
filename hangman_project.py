@@ -18,29 +18,27 @@ Your life is at stake, so beware :)
 Below is the word you have to guess.''')
     print(evalBoard)
 
-def updateBoard():
-    return "".join(board)
+def updateBoard(gameContext):
+    return "".join(gameContext["board"])
 
-def getInputCharacter():
+def getInputCharacter(gameContext):
     '''
         Get Input character asks user to input their 'guess' into terminal,
-        Then we check for errors: if errors -> print ErrorMessage and return None
-        If no errors -> call evalInputCharacter and progress with game
+        Then we check for errors: if errors -> print ErrorMessage
+        return gameContext
     '''
     print('\n'+'Guess a letter (if you dare).')
     character=input('Your guess: ').lower()
 
     #Checks for character length
     if len(character) != 1:
-        printErrorMessage('Type only one letter you choom.', evalBoard)
-        return
+        printErrorMessage('\nType only one letter you choom.', gameContext)
 
     #checks if character not in [A-Z]
     if(not character.isalpha()):
-        printErrorMessage('Type only alphabetic letters you choom.', evalBoard)
-        return
+        printErrorMessage('\nType only alphabetic letters you choom.', gameContext)
     
-    return { "word": word, "wrong": wrong, "board": board, "evalBoard": evalBoard, "stages": stages, "letters": letters}
+    return (character, gameContext)
 
 def evalInputCharacter(character, gameContext):
     '''
@@ -49,52 +47,54 @@ def evalInputCharacter(character, gameContext):
     '''
     if character in gameContext["letters"]:
         for i in range(len(gameContext["letters"])):
-            if character==gameContext[letters][i]:
-                board[i]=character
-                evalBoard = updateBoard()
+            if character==gameContext["letters"][i]:
+                gameContext["board"][i]=character
+                gameContext["evalBoard"] = updateBoard(gameContext)
             else:
                 continue
         # updated_board=''.join(temp_board)
-        letters=word.replace(character,'$')
+        gameContext["letters"]=word.replace(character,'$')
         print('\n'+'Good guess g. Keep it going'+'\n')
-        print('Board: {}'.format(evalBoard))
+        print('Board: {}'.format(gameContext["evalBoard"]))
         
 
-    elif character not in letters:
-        wrong+=1
+    elif character not in gameContext["letters"]:
+        gameContext["wrong"]+=1
         print('\nBad guess. You\'re one step closer to dying cous')
-        print('\n',board,'              ','Wrong guesses:',wrong)
-        print(''.join(stages[:wrong]))
+        print('\n{}'.format(gameContext["evalBoard"]))
+        # print('\n',board,'              ','Wrong guesses:',gameContext["wrong"])
+        # print(''.join(stages[:gameContext["wrong"]]))
+        print(gameContext["stages"][:gameContext["wrong"]])
 
-    return evalBoard, wrong
+    return gameContext
 
-def evalEndCondition(evalBoard, wrong):
+def evalEndCondition(gameContext):
     '''
         check against wrong and win
         if wrong -> run = false; 
     '''
-    print(wrong)
-    if( wrong > len(stages)):
-        print('\nThe word was {word}.\nDoes not matter tho, cause you already dead.\nGood luck in the afterlife.'.format(word=word.upper()))
+    if( gameContext["wrong"] > len(gameContext["stages"])):
+        print('\nThe word was {word}.\nDoes not matter tho, cause you already dead.\nGood luck in the afterlife.'.format(word=gameContext["word"].upper()))
         return True
     
-    if(evalBoard == word):
-        print('\nThe word was {word}.\nCongratulations on guessing it right choom, you may now leave alive.'.format(word=word.upper()))
+    if(gameContext["evalBoard"] == gameContext["word"]):
+        print('\nThe word was {word}.\nCongratulations on guessing it right choom, you may now leave alive.'.format(word=gameContext["word"].upper()))
         return True
     
     return False
 
-def printErrorMessage(msg, temp_board):
+def printErrorMessage(msg, gameContext):
     print(msg)
-    print('Board:'+ ''.join(temp_board))
+    print('Board:'+ ''.join(gameContext["board"]))
 
 def hangman(word):
     startScreen()
+    gameContext = { "word": word, "wrong": wrong, "board": board, "evalBoard": evalBoard, "stages": stages, "letters": letters}
     
     while True:
-        gameContext = getInputCharacter()
-        gameContext = evalInputCharacter(gameContext)
-        evalEnd = evalEndCondition(evalBoard, wrong)
+        character, gameContext = getInputCharacter(gameContext)
+        gameContext = evalInputCharacter(character, gameContext)
+        evalEnd = evalEndCondition(gameContext)
 
         if(evalEnd):
             break
