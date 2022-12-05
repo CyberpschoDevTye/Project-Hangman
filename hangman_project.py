@@ -1,100 +1,140 @@
-wrong=0
-word="pretty"
-stages=['','_____','|  |','|  O','| /|\\','|  |','| / \\']
-letters=word
-board=list('_'*len(word))
-evalBoard = "".join(board)
+class Hangman:
 
-def startScreen():
-    print('''\nHello player. Welcome to 
+    # wrong=0
+    # word="pretty"
+    stages=['','_____','|  |','|  O','| /|\\','|  |','| / \\']
+    # letters=word
+    # board=list('_'*len(word))
+    # evalBoard = "".join(board)
+    
 
-         H   H      A      N     N  G G G G  M         M      A      N     N
-         H   H     A A     N N   N  G        M M     M M     A A     N N   N
-         H H H    A   A    N  N  N  G   G G  M  M   M  M    A   A    N  N  N
-         H   H   A A A A   N   N N  G     G  M   M M   M   A A A A   N   N N
-         H   H  A       A  N     N  G G G G  M    M    M  A       A  N     N 
+    def __init__ (self,word):
+        self.wrong=0
+        self.letters = word
+        self.board = list('_'*len(word))
+        self.evalBoard= "".join(self.board)
+        self.character=''
+        self.input=''
+        self.run=True
+
+
+    def startScreen(self):
+        print('''\nHello player. Welcome to 
+
+            H   H      A      N     N  G G G G  M         M      A      N     N
+            H   H     A A     N N   N  G        M M     M M     A A     N N   N
+            H H H    A   A    N  N  N  G   G G  M  M   M  M    A   A    N  N  N
+            H   H   A A A A   N   N N  G     G  M   M M   M   A A A A   N   N N
+            H   H  A       A  N     N  G G G G  M    M    M  A       A  N     N 
 
 Your life is at stake, so beware :)
 Below is the word you have to guess.''')
-    print(evalBoard)
+        print(self.evalBoard)
 
-def updateBoard(gameContext):
-    return "".join(gameContext["board"])
+    def updateBoard(self):
+        return "".join(self.board)
 
-def getInputCharacter(gameContext):
-    '''
-        Get Input character asks user to input their 'guess' into terminal,
-        Then we check for errors: if errors -> print ErrorMessage
-        return gameContext
-    '''
-    print('\n'+'Guess a letter (if you dare).')
-    character=input('Your guess: ').lower()
+    def printErrorMessage(self,msg):
+        print(msg)
+        print('Board:',self.evalBoard)
 
-    #Checks for character length
-    if len(character) != 1:
-        printErrorMessage('\nType only one letter you choom.', gameContext)
+    def evalEndCondition(self):
+        '''
+            check against wrong and win
+            if wrong -> run = false; 
+        '''
+        if( self.wrong > len(self.stages)-1):
+            print('\nThe word was {word}.\nDoes not matter tho, cause you already dead.\nGood luck in the afterlife.\n'.format(word=self.letters.upper()))
+            self.run = False
+        
+        if(self.evalBoard==self.letters or self.character == self.letters):
+            print('\nThe word was {word}.\nCongratulations on guessing it right my friend, you may now leave alive.\n'.format(word=self.letters.upper()))
+            self.run = False
 
-    #checks if character not in [A-Z]
-    if(not character.isalpha()):
-        printErrorMessage('\nType only alphabetic letters you choom.', gameContext)
-    
-    return (character, gameContext)
+    def getInputCharacter(self):
+        '''
+            Get Input character asks user to input their 'guess' into terminal,
+            Then we check for errors: if errors -> print ErrorMessage
+            return gameContext
+        '''
+        print('\n'+'Guess a letter or type in the full word (if you dare).')
+        self.character=input('Your guess: ').lower()
 
-def evalInputCharacter(character, gameContext):
-    '''
-        Take character (argument) and then checks if character is in word.
-        If in word -> update temp_board
-    '''
-    if character in gameContext["letters"]:
-        for i in range(len(gameContext["letters"])):
-            if character==gameContext["letters"][i]:
-                gameContext["board"][i]=character
-                gameContext["evalBoard"] = updateBoard(gameContext)
+        if len(self.character) == len(self.letters):
+            if self.character == self.letters:
+                print('\nNot bad.')
+                self.evalEndCondition()
+                return
             else:
-                continue
-        gameContext["letters"]=word.replace(character,'$')
-        print('\n'+'Good guess g. Keep it going'+'\n')
-        print('Board: {}'.format(gameContext["evalBoard"]))
+                print('\nClose, but not quite. (The word you guessed has the same length as the answer)')
+
+            
+        
+        #Checks for character length
+        elif len(self.character) != 1:
+            self.character = ''
+            self.printErrorMessage('\nType only one character if you don\'t truly know the answer gonk.')
+
+        #checks if self.character not in [A-Z]
+        elif(not self.character.isalpha()):
+            self.character = ''
+            self.printErrorMessage('\nType only alphabetic letters gonk.')
+
+    def wrongGuess(self,msg):
+        print(msg)
+        print('\n{}'.format(self.evalBoard))
+        print('\n'.join(Hangman.stages[:self.wrong]))
+
         
 
-    elif character not in gameContext["letters"]:
-        gameContext["wrong"]+=1
-        print('\nBad guess. You\'re one step closer to dying cous')
-        print('\n{}'.format(gameContext["evalBoard"]))
-        print('\n'.join(stages[:gameContext["wrong"]]))
 
-    return gameContext
+    def evalInputCharacter(self):
+        '''
+            Take character (argument) and then checks if character is in word.
+            If in word -> update temp_board
+        '''
 
-def evalEndCondition(gameContext):
-    '''
-        check against wrong and win
-        if wrong -> run = false; 
-    '''
-    if( gameContext["wrong"] > len(gameContext["stages"]) -1 ):
-        print('\nThe word was {word}.\nDoes not matter tho, cause you already dead.\nGood luck in the afterlife.'.format(word=gameContext["word"].upper()))
-        return True
-    
-    if(gameContext["evalBoard"] == gameContext["word"]):
-        print('\nThe word was {word}.\nCongratulations on guessing it right choom, you may now leave alive.'.format(word=gameContext["word"].upper()))
-        return True
-    
-    return False
+        if self.character in self.input and self.character != '':
+            print('\nYou have already guessed this letter! Try another one.')
+            print('Board: {}'.format(self.evalBoard))
+             
 
-def printErrorMessage(msg, gameContext):
-    print(msg)
-    print('Board:'+ ''.join(gameContext["board"]))
+        elif self.character in self.letters and (self.character != '') and not self.character == self.letters:
+            self.input+=self.character
+            for i in range(len(self.letters)):
+                if self.character==self.letters[i]:
+                    self.board[i]=self.character
+                    self.evalBoard = self.updateBoard()
+                else:
+                    continue
+            if self.evalBoard == self.letters:
+                self.evalEndCondition()
+            else:
+                print('\n'+'Good guess friend. Keep it going'+'\n')
+                print('Board: {}'.format(self.evalBoard))
+            
 
-def hangman(word):
-    startScreen()
-    gameContext = { "word": word, "wrong": wrong, "board": board, "evalBoard": evalBoard, "stages": stages, "letters": letters}
-    
-    while True:
-        character, gameContext = getInputCharacter(gameContext)
-        gameContext = evalInputCharacter(character, gameContext)
-        evalEnd = evalEndCondition(gameContext)
+        elif self.character not in self.letters and not len(self.character) == len(self.letters):
+            self.wrong+=1
+            self.input+=self.character
+            if self.wrong> len(self.stages)-1:
+                self.wrongGuess('Your last guess is up my friend.')
+                self.evalEndCondition()
+            else:
+                self.wrongGuess('Bad guess. You\'re one step closer to dying my friend.')
 
-        if(evalEnd):
-            break
+    def hangman(self):
+        self.startScreen()
+        
+        
+        while self.run:
+            self.getInputCharacter()
+            self.evalInputCharacter()
+            # evalEnd = evalEndCondition(gameContext)
+
+            # if(evalEnd):
+            #     break
 
 
-hangman(word)
+hangman_1 = Hangman('conscious')
+hangman_1.hangman()
